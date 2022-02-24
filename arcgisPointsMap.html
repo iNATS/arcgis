@@ -1,0 +1,143 @@
+<html dir="rtl">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>
+        ArcGIS API for JavaScript Tutorials: Create a JavaScript starter app
+    </title>
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.15/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.15/"></script>
+
+    <script>
+
+        // get request
+        var myHeaders = new Headers();
+        myHeaders.append(
+            "Authorization",
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJBZHZpc29yIiwianRpIjoiMjZhNDEyZWYtNTc4OS00OTcyLWE3NmQtNzViOTlhZjc5NzNlIiwiZW1haWwiOiJBZHZpc29yQGdtYWlsLmNvbSIsInVpZCI6ImI3NGRkZDE0LTYzNDAtNDg0MC05NWMyLWRiMTI1NTQ4NDNlNSIsInJvbGVzIjoiQWR2aXNvciIsImV4cCI6MTY0NTc5ODU0MSwiaXNzIjoiU2VjdXJlQXBpIiwiYXVkIjoiU2VjdXJlQXBpVXNlciJ9.QrfFIfy3YH6QkqIL11Ym6J0TvckZo7fbux8o3QnT_74"
+        );
+        myHeaders.append(
+            "Cookie",
+            ".AspNetCore.Identity.Application=CfDJ8JqKm8VZ9ZNHhgaMm-9a8HixX2fDvZdu0Wg9cPmJKae6Wo4WvNArQarPo8c0FS35q-ixlv6qw3SsgUJzbA3S8XndBtH-bBkDZsWVE87A1zOfnJUx-gFHsosKjq0kb2sn3rgIPatxsQTcqeBDNThE0O8Dqzv7PgIx-wqLoaGqGcf9i1KVKETEKnZCvZNHTiyhULdf3YHJmL1z3WHljuirXHFXkMRVzBHKAOHDeJGLstwTu4L0MzYbHcR0NXkCvUBndXWbbv13R47YhGKkd-NUrS7nMkmmt_qC-dbLtmMDuRVHTClma9TiGHQyRWCAQrwK450p9TjRyhREMmkPw_vwisM5HGU1xiVI7e3A-7ZRxXNnEPf_om2DjjUWAhMZp1GSC72wcTUZWDXW9-HTCVuVVVeOBBqE9o7DtQdghhiU5T7OxjCljOBnIUkS6_HNb3gBo4620kKuqPs0_kX9aAjgE9F3a8o6r6mdpng5qpWF3rEwMjcSiD_CBhUDSLQK-hK0SbVK3N0mZ8NJBSnKiEoym3sD9jPpWYMjFReWZZAFAXkk5fM2s6c-rMSGq2VP0RKh5OogXFKsrOWrDO4k8klujipnPi1VQod0gvK0-rpbo3ngSxA7XpuS_RTMqiOIMv7PZNQyweiIEZs8j0PQlxeZ-Z5B3xeLNDtYT8J7hkwcCS2xwl_Ph2hmCFbwSSMWjfixPdnlyzAC86eZFLk-6o57m-6zn2HizV_OVkS9MdfJ1njmfjiVbD-9KGP9KwBGy9jYR76bBnGIRUX546N2Q7VQLqBjfeS_G8MhGTa64ujX_AGaiTWmA-D8O7iLG2kDqnh_s_NgvL_r43xIvhXIiAssXmJrh-2qzoj1DL0QmFf8LF77"
+        );
+
+        var requestOptions = {
+            method: "GET",
+            headers: myHeaders,
+            redirect: "follow",
+        };
+
+        const test = async () => {
+            try {
+                let data = await fetch(
+                    "https://qualityapi.afaqci.com/api/TestLocations/GetAllTestLocations",
+                    requestOptions
+                );
+                let newData = await data.json();
+                apiData = newData;
+
+                require([
+                    "esri/Map",
+                    "esri/views/MapView",
+                    "esri/Graphic",
+                    "esri/layers/GraphicsLayer",
+                    "esri/geometry/Multipoint",
+                    "esri/layers/FeatureLayer",
+                    "esri/geometry/Point",
+                    "dojo/domReady!",
+                ], function (Map, MapView, Graphic, GraphicsLayer, Point) {
+                    var map = new Map({
+                        basemap: "osm",
+                    });
+
+                    var view = new MapView({
+                        container: "viewDiv",
+                        map: map,
+                        center: [46.738586, 24.774265], // longitude, latitude
+                        zoom: 11,
+                    });
+
+                    var graphicsLayer = new GraphicsLayer();
+                    map.add(graphicsLayer);
+
+                    for (let i = 0; i < newData.length; i++) {
+
+                        var maxNumber = newData[i].totalNumber;
+                        var cityTotalNumber = parseInt(newData[i].totalNumber);
+
+                        var success = [46, 204, 113];
+                        var warning = [241, 196, 15];
+                        var danger = [231, 76, 60];
+                        var pointerColors = [];
+
+                        if (cityTotalNumber === 0) {
+                            pointerColors = success;
+                        } else if (1 >= cityTotalNumber >= (maxNumber / 2)) {
+                            pointerColors = warning;
+                        } else {
+                            pointerColors = danger;
+                        }
+
+                        var Point = {
+                            type: "point",
+                            longitude: newData[i].longitude,
+                            latitude: newData[i].latitude
+                        };
+
+                        var simpleMarkerSymbol = {
+                            type: "simple-marker",
+                            color: pointerColors,
+                            outline: {
+                                color: [255, 255, 255], // white
+                                width: 1,
+                            },
+                        };
+
+                        //*** ADD ***//
+                        // Create attributes
+                        var attributes = {
+                            Name: newData[i].districtName, // The name of the
+                            Location: newData[i].code, // The owner of the
+                            TotalNumber: newData[i].totalNumber,
+                        };
+                        // Create popup template
+                        var popupTemplate = {
+                            title: "{Name}",
+                            content: "كود البلديه: <b>{Location}</b>"+"<br>"+"اجمالى الكثافه:<b>{TotalNumber}</b>",
+                        };
+
+                        var pointGraphic = new Graphic({
+                            geometry: Point,
+                            symbol: simpleMarkerSymbol,
+                            //*** ADD ***//
+                            attributes: attributes,
+                            popupTemplate: popupTemplate,
+                        });
+
+                        graphicsLayer.add(pointGraphic);
+                    }
+                });
+            } catch (e) {
+                console.log("error", e);
+            }
+        };
+        test();
+    </script>
+</head>
+
+<body>
+    <div id="viewDiv"></div>
+</body>
+
+</html>

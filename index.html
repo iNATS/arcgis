@@ -1,0 +1,183 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>ArcGIS API for JavaScript Tutorials: Display a map</title>
+
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.22/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.22/"></script>
+
+    <script>
+
+        // get request
+        var myHeaders = new Headers();
+        myHeaders.append(
+            "Authorization",
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJBZHZpc29yIiwianRpIjoiMjZhNDEyZWYtNTc4OS00OTcyLWE3NmQtNzViOTlhZjc5NzNlIiwiZW1haWwiOiJBZHZpc29yQGdtYWlsLmNvbSIsInVpZCI6ImI3NGRkZDE0LTYzNDAtNDg0MC05NWMyLWRiMTI1NTQ4NDNlNSIsInJvbGVzIjoiQWR2aXNvciIsImV4cCI6MTY0NTc5ODU0MSwiaXNzIjoiU2VjdXJlQXBpIiwiYXVkIjoiU2VjdXJlQXBpVXNlciJ9.QrfFIfy3YH6QkqIL11Ym6J0TvckZo7fbux8o3QnT_74"
+        );
+        myHeaders.append(
+            "Cookie",
+            ".AspNetCore.Identity.Application=CfDJ8JqKm8VZ9ZNHhgaMm-9a8HixX2fDvZdu0Wg9cPmJKae6Wo4WvNArQarPo8c0FS35q-ixlv6qw3SsgUJzbA3S8XndBtH-bBkDZsWVE87A1zOfnJUx-gFHsosKjq0kb2sn3rgIPatxsQTcqeBDNThE0O8Dqzv7PgIx-wqLoaGqGcf9i1KVKETEKnZCvZNHTiyhULdf3YHJmL1z3WHljuirXHFXkMRVzBHKAOHDeJGLstwTu4L0MzYbHcR0NXkCvUBndXWbbv13R47YhGKkd-NUrS7nMkmmt_qC-dbLtmMDuRVHTClma9TiGHQyRWCAQrwK450p9TjRyhREMmkPw_vwisM5HGU1xiVI7e3A-7ZRxXNnEPf_om2DjjUWAhMZp1GSC72wcTUZWDXW9-HTCVuVVVeOBBqE9o7DtQdghhiU5T7OxjCljOBnIUkS6_HNb3gBo4620kKuqPs0_kX9aAjgE9F3a8o6r6mdpng5qpWF3rEwMjcSiD_CBhUDSLQK-hK0SbVK3N0mZ8NJBSnKiEoym3sD9jPpWYMjFReWZZAFAXkk5fM2s6c-rMSGq2VP0RKh5OogXFKsrOWrDO4k8klujipnPi1VQod0gvK0-rpbo3ngSxA7XpuS_RTMqiOIMv7PZNQyweiIEZs8j0PQlxeZ-Z5B3xeLNDtYT8J7hkwcCS2xwl_Ph2hmCFbwSSMWjfixPdnlyzAC86eZFLk-6o57m-6zn2HizV_OVkS9MdfJ1njmfjiVbD-9KGP9KwBGy9jYR76bBnGIRUX546N2Q7VQLqBjfeS_G8MhGTa64ujX_AGaiTWmA-D8O7iLG2kDqnh_s_NgvL_r43xIvhXIiAssXmJrh-2qzoj1DL0QmFf8LF77"
+        );
+
+        var requestOptions = {
+            method: "GET",
+            headers: myHeaders,
+            redirect: "follow",
+        };
+
+        const test = async () => {
+            try {
+                let data = await fetch(
+                    "https://qualityapi.afaqci.com/api/TestLocations/GetAllTestLocations",
+                    requestOptions
+                );
+                let newData = await data.json();
+                apiData = newData;
+
+                console.log(newData)
+
+                require([
+                    "esri/config",
+                    "esri/Map",
+                    "esri/views/MapView",
+                    "esri/Graphic",
+                    "esri/layers/GraphicsLayer",
+                ], function (
+                    esriConfig,
+                    Map,
+                    MapView,
+                    Graphic,
+                    GraphicsLayer,
+                ) {
+
+                    esriConfig.apiKey = "dbf35f5a51ab1385555f178d3177d0e9fb96d6c0d2b5d8e3d621fb1c20666687";
+
+                    const map = new Map({
+                        basemap: "gray" // Basemap layer service
+                    });
+
+                    const view = new MapView({
+                        map: map,
+                        center: [46.738586, 24.774265], // longitude, latitude
+                        zoom: 10, // Zoom level
+                        container: "viewDiv" // Div element
+                    });
+
+
+                    const graphicsLayer = new GraphicsLayer();
+                    map.add(graphicsLayer);
+
+                    const point = { //Create a point
+                        type: "point",
+                        longitude: -118.80657463861,
+                        latitude: 34.0005930608889
+                    };
+                    const simpleMarkerSymbol = {
+                        type: "simple-marker",
+                        color: [226, 119, 40],  // Orange
+                        outline: {
+                            color: [255, 255, 255], // White
+                            width: 1
+                        }
+                    };
+
+                    const pointGraphic = new Graphic({
+                        geometry: point,
+                        symbol: simpleMarkerSymbol
+                    });
+                    graphicsLayer.add(pointGraphic);
+                    const polyline = {
+                        type: "polyline",
+                        paths: [],
+                    };
+
+                    for (let i = 0; i < newData.length; i++) {
+                        var lat = parseFloat(newData[i].latitude);
+                        var long = parseFloat(newData[i].longitude);
+                        var location = [long, lat];  //Longitude, latitude
+                        polyline.paths.push(location)
+                    }
+
+                    const simpleLineSymbol = {
+                        type: "simple-line",
+                        color: [231, 76, 60],
+                        width: 5
+                    };
+
+                    const polylineGraphic = new Graphic({
+                        geometry: polyline,
+                        symbol: simpleLineSymbol
+                    });
+                    graphicsLayer.add(polylineGraphic);
+
+                    var location2 = [
+                        [-118.818984489994, 34.0137559967283], //Longitude, latitude
+                        [-118.806796597377, 34.0215816298725], //Longitude, latitude
+                        [-118.791432890735, 34.0163883241613], //Longitude, latitude
+                        [-118.79596686535, 34.008564864635],   //Longitude, latitude
+                        [-118.808558110679, 34.0035027131376]  //Longitude, latitude
+                    ];
+
+                    // Create a polygon geometry
+                    const polygon = {
+                        type: "polygon",
+                        rings: location2
+                    };
+
+                    const simpleFillSymbol = {
+                        type: "simple-fill",
+                        color: [227, 139, 79, 0.8],  // Orange, opacity 80%
+                        outline: {
+                            color: [255, 255, 255],
+                            width: 1
+                        }
+                    };
+
+                    const popupTemplate = {
+                        title: "{Name}",
+                        content: "{Description}"
+                    }
+                    const attributes = {
+                        Name: "Graphic",
+                        Description: "I am a polygon"
+                    }
+
+                    const polygonGraphic = new Graphic({
+                        geometry: polygon,
+                        symbol: simpleFillSymbol,
+
+                        attributes: attributes,
+                        popupTemplate: popupTemplate
+
+                    });
+                    graphicsLayer.add(polygonGraphic);
+
+                });
+            }
+            catch (e) {
+                console.log("error", e);
+            }
+        };
+        test();
+    </script>
+
+</head>
+
+<body>
+    <div id="viewDiv"></div>
+</body>
+
+</html>
